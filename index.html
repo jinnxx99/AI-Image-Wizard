@@ -1,4 +1,65 @@
 <!DOCTYPE html>
 <html>
-<!-- PASTE THE FULL CODE HERE (from previous message) -->
+<head>
+    <title>🔥 AI Image Wizard - Auto Watermark Remover & 8x Upscaler</title>
+    <style>
+        :root { --neon-blue: #00f3ff; --cyber-pink: #ff00ff; }
+        .cyber-box {
+            background: #0a0a0f;
+            border: 3px solid var(--neon-blue);
+            border-radius: 30px;
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 2rem auto;
+            box-shadow: 0 0 50px var(--cyber-pink);
+        }
+        #uploadZone {
+            border: 4px dashed var(--neon-blue);
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .neon-btn {
+            background: none;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .neon-btn:hover { text-shadow: 0 0 20px var(--neon-blue); }
+    </style>
+</head>
+<body>
+    <div class="cyber-box">
+        <div id="uploadZone">
+            <button class="neon-btn" onclick="document.getElementById('fileInput').click()">
+                🚀 UPLOAD & AUTO-ENHANCE
+            </button>
+            <input type="file" id="fileInput" hidden accept="image/*">
+        </div>
+    </div>
+
+    <!-- Cloudinary Setup (YOUR CLOUD_NAME ADDED) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0"></script>
+    <script src="https://cdn.jsdelivr/npm/upscaler@2.0.0/dist/browser/upscaler.min.js"></script>
+    <script src="https://unpkg.com/cloudinary-core@2.11.4/cloudinary-core-shrinkwrap.min.js"></script>
+    <script>
+      const cloudinary = cloudinary.Cloudinary.new({ 
+        cloud_name: 'dnsk6ioin' // ✅ YOUR CLOUD NAME
+      });
+      const upscaler = new Upscaler({ model: 'x8' });
+
+      document.getElementById('fileInput').addEventListener('change', async (e) => {
+          const file = e.target.files[0];
+          const cleanedImg = await cloudinary.upload(file.name)
+            .effect('make_transparent:100').toURL();
+          const finalImg = await upscaler.upscale(cleanedImg);
+          window.open().document.write(`<img src="${finalImg.src}" style="max-width:100%">`);
+      });
+    </script>
+</body>
 </html>

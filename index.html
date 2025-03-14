@@ -43,22 +43,44 @@
         </div>
     </div>
 
-    <!-- Cloudinary Setup (YOUR CLOUD_NAME ADDED) -->
+    <!-- Fixed Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0"></script>
-    <script src="https://cdn.jsdelivr/npm/upscaler@2.0.0/dist/browser/upscaler.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/upscaler@2.0.0/dist/browser/upscaler.min.js"></script>
     <script src="https://unpkg.com/cloudinary-core@2.11.4/cloudinary-core-shrinkwrap.min.js"></script>
+
     <script>
       const cloudinary = cloudinary.Cloudinary.new({ 
-        cloud_name: 'dnsk6ioin' // ✅ YOUR CLOUD NAME
+        cloud_name: 'dnsk6ioin' // ✅ Your Cloud name
       });
       const upscaler = new Upscaler({ model: 'x8' });
 
       document.getElementById('fileInput').addEventListener('change', async (e) => {
           const file = e.target.files[0];
-          const cleanedImg = await cloudinary.upload(file.name)
-            .effect('make_transparent:100').toURL();
-          const finalImg = await upscaler.upscale(cleanedImg);
-          window.open().document.write(`<img src="${finalImg.src}" style="max-width:100%">`);
+          
+          // Step 1: Upload to Cloudinary for watermark removal
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('upload_preset', 'unsigned'); // Enable in Cloudinary settings
+          
+          const cloudinaryResponse = await fetch(`https://api.cloudinary.com/v1_1/dnsk6ioin/image/upload`, {
+            method: 'POST',
+            body: formData
+          });
+          const cloudinaryData = await cloudinaryResponse.json();
+          const cleanedImgUrl = cloudinaryData.secure_url.replace('/upload/', '/upload/e_make_transparent:100/'); // Watermark removal
+
+          // Step 2: Upscale to 8x
+          const finalImg = await upscaler.upscale(cleanedImgUrl);
+          
+          // Step 3: Show result
+          const resultWindow = window.open();
+          resultWindow.document.body.innerHTML = `
+            <h1 style="color:#00f3ff">✨ Original vs. Enhanced ✨</h1>
+            <div style="display:flex; gap:20px">
+              <img src="${URL.createObjectURL(file)}" style="max-width:400px"/>
+              <img src="${finalImg.src}" style="max-width:800px"/>
+            </div>
+          `;
       });
     </script>
 </body>
